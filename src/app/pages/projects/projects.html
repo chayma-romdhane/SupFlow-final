@@ -1,0 +1,113 @@
+<div class="app-shell">
+  <div class="dashboard-page">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SupFlow Logo</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a
+          class="nav-item"
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/projects" routerLinkActive="active">
+          <span>Projects</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span>Tasks</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span>Work Logs</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span>Settings</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="main-layout">
+      <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="search-box">
+            <input type="search" placeholder="Search for anything..." />
+          </div>
+          <button class="icon-button" aria-label="Notifications">&#128276;</button>
+              <div class="user-info">
+                <div class="user-text">
+                  <span class="user-name">Chayma</span>
+                  <span class="user-role">Student &#64; Sup'Com</span>
+                </div>
+                <div class="user-avatar">C</div>
+              </div>
+            </div>
+          </header>
+
+      <div class="main-card">
+        <section class="projects-page">
+          <header class="projects-header">
+            <div class="projects-header__text">
+              <p class="projects-eyebrow">Workspace</p>
+              <h1>Projects</h1>
+              <p>Monitor every academic project, their owners, and the upcoming deadlines from one view.</p>
+            </div>
+            <div class="projects-actions">
+              <div class="arrow-group">
+                <button class="arrow-btn" aria-label="Previous">&lsaquo;</button>
+                <button class="arrow-btn" aria-label="Next">&rsaquo;</button>
+              </div>
+              <button class="filter-btn" type="button">
+                This year
+                <span class="caret">&#9662;</span>
+              </button>
+              <button class="primary-btn" type="button">+ Add project</button>
+            </div>
+          </header>
+
+          <section class="projects-grid">
+            <div *ngIf="isLoading" class="info">Loading projects...</div>
+            <div *ngIf="!isLoading && errorMessage" class="info error">{{ errorMessage }}</div>
+            <div *ngIf="!isLoading && !errorMessage && projects.length === 0" class="info">No projects found.</div>
+
+            <article class="project-card" *ngFor="let project of projects">
+              <div class="project-card__header">
+                <div>
+                  <p class="project-label">Project</p>
+                  <h2>{{ project.title }}</h2>
+                </div>
+                <span class="status-chip">
+                  {{ project.type || 'General' }}
+                </span>
+              </div>
+
+              <p class="project-description">
+                {{ project.description || 'No description provided.' }}
+              </p>
+
+              <div class="project-meta">
+                <div>
+                  <p class="project-label">Class</p>
+                  <span class="deadline">{{ project.classe || 'N/A' }}</span>
+                </div>
+                <div>
+                  <p class="project-label">Supervisor</p>
+                  <span class="issues-count">{{ project.superviseur || 'N/A' }}</span>
+                </div>
+              </div>
+
+              <div class="project-members">
+                <div class="avatar" *ngFor="let member of project.students">{{ member?.name || 'M' }}</div>
+                <div class="avatar avatar--extra" *ngIf="project.students?.length">
+                  {{ project.students.length }} members
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

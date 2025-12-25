@@ -1,0 +1,87 @@
+<main class="signup-shell">
+  <section class="visual-panel">
+    <div class="visual-panel__content">
+      <p class="visual-panel__eyebrow">Join SupFlow</p>
+      <h1 class="visual-panel__title">
+        Simplify the onboarding<br/>
+        of your academic projects.
+      </h1>
+      <p class="visual-panel__subtitle">
+        Collaborate with supervisors, track deliverables, and keep every milestone
+        under control in a single workspace.
+      </p>
+    </div>
+    <div class="visual-panel__glow" aria-hidden="true"></div>
+  </section>
+  <section class="form-panel">
+    <div class="form-panel__inner">
+      <header class="form-panel__header">
+        <h2>Create Your Account</h2>
+        <p>Tell us a little more about you to get started.</p>
+      </header>
+      <form class="form" [formGroup]="signupForm" (ngSubmit)="onSubmit()" novalidate>
+        <p *ngIf="statusMessage" class="status" [ngClass]="statusType">{{ statusMessage }}</p>
+        <label class="field">
+          <span>Full name</span>
+          <input type="text" placeholder="Ahmed Mourad" formControlName="fullName" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" placeholder="Ahmed.Mourad@supcom.tn" formControlName="email" />
+        </label>
+        <div class="field-grid">
+          <label class="field">
+            <span>Role</span>
+            <select formControlName="role">
+              <option value="" disabled>Select your role</option>
+              <option value="student">Student</option>
+              <option value="coach">Supervisor</option>
+              <option value="jury">Jury member</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Program year</span>
+            <select formControlName="programYear">
+              <option value="" disabled>Choose a year</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span>Password</span>
+          <div class="field__password">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              placeholder="Create a password"
+              formControlName="password"
+            />
+          </div>
+        </label>
+        <label class="field">
+          <span>Confirm password</span>
+          <div class="field__password">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              placeholder="Repeat your password"
+              formControlName="confirmPassword"
+            />
+
+          </div>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" formControlName="acceptTerms" />
+          <span>I agree to the SupFlow Terms and Privacy Policy.</span>
+        </label>
+        <button class="btn" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Creating account...' : 'Create account' }}
+        </button>
+      </form>
+      <footer class="form__footer">
+        <span>Already have an account?</span>
+        <a class="link" routerLink="/login">Log in</a>
+      </footer>
+    </div>
+  </section>
+</main>

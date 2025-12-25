@@ -1,0 +1,73 @@
+<main class="login-shell">
+  <section class="visual-panel">
+    <div class="visual-panel__content">
+      <p class="visual-panel__eyebrow">Sign In</p>
+      <h1 class="visual-panel__title">
+        Manage your academic<br />
+        projects smoothly.
+      </h1>
+      <p class="visual-panel__subtitle">
+        Track P2M, PACTE, PFE, and Challenge d’Entreprendre projects
+        &amp; collaborate with your supervisors.
+      </p>
+    </div>
+    <div class="visual-panel__glow" aria-hidden="true"></div>
+  </section>
+  <section class="form-panel">
+    <div class="form-panel__inner">
+      <header class="form-panel__header">
+        <h2>Log in to Your Account</h2>
+        <p>Welcome back! Choose your preferred sign-in method.</p>
+      </header>
+      <form class="form" (ngSubmit)="onSubmit()" #formRef="ngForm" novalidate>
+        <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+        <label class="field" for="email">
+          <span>Email</span>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            required
+            [(ngModel)]="form.email"
+          />
+        </label>
+        <label class="field" for="password">
+          <span>Password</span>
+          <div class="field__password">
+            <input
+              id="password"
+              name="password"
+              [type]="showPwd ? 'text' : 'password'"
+              placeholder="Enter your password"
+              required
+              [(ngModel)]="form.password"
+            />
+            <button type="button" (click)="togglePwd()" aria-label="Show or hide password">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path
+                  d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          </div>
+        </label>
+        <div class="form__meta">
+          <label class="checkbox">
+            <input type="checkbox" name="remember" [(ngModel)]="form.remember" />
+            <span>Remember me for 30 days</span>
+          </label>
+          <a class="link" routerLink="/forgot-password">Forgot password?</a>
+        </div>
+        <button class="btn" type="submit" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Signing in...' : 'Sign In' }}
+        </button>
+      </form>
+      <footer class="form__footer">
+        <span>New here? Create an account.</span>
+        <a class="link" routerLink="/signup">Sign up</a>
+      </footer>
+    </div>
+  </section>
+</main>

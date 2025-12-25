@@ -1,0 +1,258 @@
+<div class="app-shell">
+  <div class="dashboard-page">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SupFlow Logo</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a
+          class="nav-item"
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/projects" routerLinkActive="active">
+          <span>Projects</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span>Tasks</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span>Work Logs</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span>Settings</span>
+        </a>
+      </nav>
+    </aside>
+
+    
+    <div class="main-layout">
+      
+      <header class="topbar">
+        <div class="topbar-left">
+          
+        </div>
+        <div class="topbar-right">
+          <div class="search-box">
+            <input type="search" placeholder="Search for anything..." />
+          </div>
+          <button class="icon-button" aria-label="Notifications">🔔</button>
+          <div class="user-info">
+            <div class="user-text">
+              <span class="user-name">Chayma</span>
+              <span class="user-role">Student · Sup'Com</span>
+            </div>
+            <div class="user-avatar">C</div>
+          </div>
+        </div>
+      </header>
+
+      
+      <div class="main-card">
+        <header class="page-header">
+          <h1 class="page-title">Project Dashboard</h1>
+          <p class="page-subtitle">
+            Track your academic progress, tasks, and milestones in real time.
+          </p>
+        </header>
+
+        <div class="content-grid">
+          
+          <div class="column-left">
+            
+            <section class="card project-overview">
+              <div class="project-main">
+                <div class="card-title">Project Overview Box</div>
+                <div class="project-carousel">
+                  <button class="carousel-btn" aria-label="Projet précédent">‹</button>
+                  <div class="project-info">
+                    <div class="project-info-inner">
+                      <span class="label">Project</span>
+                      <span class="value">P2M – Smart Waste Sorting System</span>
+                      <span class="label">Team</span>
+                      <span class="value">Group 6</span>
+                      <span class="label">Supervisor</span>
+                      <span class="value">Dr. Asma Ben Saïd</span>
+                    </div>
+                    <div class="project-footer">
+                      <span class="status-label">Pending validation</span>
+                      <div class="status-bar">
+                        <div class="status-bar-fill"></div>
+                      </div>
+                      <span class="status-number">10</span>
+                    </div>
+                  </div>
+                  <button class="carousel-btn" aria-label="Projet suivant">›</button>
+                </div>
+              </div>
+
+              <aside class="project-stats">
+                <p class="small-heading">Overall Progress</p>
+                <div class="overall-progress">72%</div>
+                <ul class="progress-list">
+                  <li>
+                    <span><span class="dot dot-blue"></span>Tasks Completed</span>
+                    <span class="badge">15</span>
+                  </li>
+                  <li>
+                    <span><span class="dot dot-green"></span>Deliverables Approved</span>
+                    <span class="badge">5</span>
+                  </li>
+                  <li>
+                    <span><span class="dot dot-red"></span>Late Tasks</span>
+                    <span class="badge badge-red">2</span>
+                  </li>
+                </ul>
+              </aside>
+            </section>
+
+            
+            <section class="card activity-log">
+              <div class="card-header-row">
+                <div class="card-title">Activity Log</div>
+              </div>
+              <div class="table-wrapper">
+                <table class="activity-table">
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th>Activity</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Chayma</td>
+                      <td>Submitted PDF "Design Spec v1"</td>
+                      <td>03 Nov 2025</td>
+                      <td><span class="status-pill status-approved">Approved</span></td>
+                    </tr>
+                    <tr>
+                      <td>Yassmine</td>
+                      <td>Uploaded prototype branch</td>
+                      <td>03 Nov 2025</td>
+                      <td><span class="status-pill status-approved">Approved</span></td>
+                    </tr>
+                    <tr>
+                      <td>Ahmed</td>
+                      <td>Meeting with supervisor</td>
+                      <td>03 Nov 2025</td>
+                      <td><span class="status-pill status-approved">Approved</span></td>
+                    </tr>
+                    <tr>
+                      <td>Amina</td>
+                      <td>Uploaded dataset file</td>
+                      <td>03 Nov 2025</td>
+                      <td><span class="status-pill status-approved">Approved</span></td>
+                    </tr>
+                    <tr>
+                      <td>Nour</td>
+                      <td>Task "UI Wireframes" created</td>
+                      <td>03 Nov 2025</td>
+                      <td><span class="status-pill status-approved">Approved</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          
+          <div class="column-right">
+           
+            <section class="card milestones-card">
+              <div class="card-header-row">
+                <div class="card-title">Milestones</div>
+                <span class="emoji">✨</span>
+              </div>
+              <div class="milestones-grid">
+                <div class="milestone-item">
+                  <h3>Project Topic Approved</h3>
+                  <span class="pill pill-green">Completed</span>
+                </div>
+                <div class="milestone-item">
+                  <h3>Prototype development</h3>
+                  <span class="pill pill-orange">In progress</span>
+                </div>
+                <div class="milestone-item">
+                  <h3>Final Report</h3>
+                  <span class="pill pill-grey">Upcoming</span>
+                </div>
+              </div>
+            </section>
+
+            
+            <section class="card workload-card">
+              <div class="card-title">Workload Distribution Statistics</div>
+
+              <div class="workload-row">
+                <span class="workload-label">
+                  <span class="icon">🧠</span> Research
+                </span>
+                <div class="workload-bar">
+                  <div class="fill fill-pink" style="width: 47%"></div>
+                </div>
+                <span class="workload-percent">47%</span>
+              </div>
+
+              <div class="workload-row">
+                <span class="workload-label">
+                  <span class="icon">🛠</span> Development
+                </span>
+                <div class="workload-bar">
+                  <div class="fill fill-green" style="width: 38%"></div>
+                </div>
+                <span class="workload-percent">38%</span>
+              </div>
+
+              <div class="workload-row">
+                <span class="workload-label">
+                  <span class="icon">🖥</span> Testing
+                </span>
+                <div class="workload-bar">
+                  <div class="fill fill-blue" style="width: 15%"></div>
+                </div>
+                <span class="workload-percent">15%</span>
+              </div>
+            </section>
+
+            <section class="team-reminder-grid">
+  
+  <div class="card team-card">
+    <div class="card-title">Team</div>
+
+    <div class="team-avatars">
+      <span class="avatar">C</span>
+      <span class="avatar">Y</span>
+      <span class="avatar">A</span>
+      <span class="avatar">A</span>
+      <span class="avatar">N</span>
+      <button class="avatar avatar-add" aria-label="Add member">+</button>
+    </div>
+
+    <div class="task-input-row">
+      <input type="text" placeholder="Describe the task..." />
+      <button class="btn-primary add-btn">Add</button>
+    </div>
+  </div>
+
+
+              <div class="card reminder-card">
+                <div class="card-title">Reminder</div>
+                <p class="reminder-text">
+                  Final presentation slides must be uploaded 48h before defense day.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
