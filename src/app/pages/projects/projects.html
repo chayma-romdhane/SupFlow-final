@@ -63,7 +63,7 @@
                 This year
                 <span class="caret">&#9662;</span>
               </button>
-              <button class="primary-btn" type="button">+ Add project</button>
+              <button class="primary-btn" type="button" (click)="openProjectForm()">+ Add project</button>
             </div>
           </header>
 
@@ -78,35 +78,238 @@
                   <p class="project-label">Project</p>
                   <h2>{{ project.title }}</h2>
                 </div>
-                <span class="status-chip">
-                  {{ project.type || 'General' }}
+                <span class="status-chip" [ngClass]="getStatusClass(project)">
+                  {{ project.status || 'In progress' }}
                 </span>
               </div>
+
+              <p class="project-meta-line">
+                {{ project.type || 'General' }} <span *ngIf="project.classe">&middot; {{ project.classe }}</span>
+              </p>
 
               <p class="project-description">
                 {{ project.description || 'No description provided.' }}
               </p>
 
-              <div class="project-meta">
-                <div>
-                  <p class="project-label">Class</p>
-                  <span class="deadline">{{ project.classe || 'N/A' }}</span>
-                </div>
-                <div>
-                  <p class="project-label">Supervisor</p>
-                  <span class="issues-count">{{ project.superviseur || 'N/A' }}</span>
+              <div class="project-supervisor">
+                <span class="footer-label">Supervisor</span>
+                <span class="footer-value">{{ project.superviseur || 'N/A' }}</span>
+              </div>
+
+              <div class="footer-section deadline-inline">
+                <span class="footer-label">Deadline</span>
+                <span class="footer-value highlight">{{ project.deadline || 'Not set' }}</span>
+              </div>
+
+              <div class="project-divider"></div>
+
+              <div class="project-card__footer">
+                <div class="footer-section footer-section--members">
+                  <span class="footer-label">Members</span>
+                  <ng-container *ngIf="project.students?.length; else noMembers">
+                    <div class="avatar-stack">
+                      <span
+                        class="avatar"
+                        *ngFor="let member of project.students | slice:0:3; let idx = index"
+                        [style.zIndex]="5 - idx"
+                        [attr.title]="getMemberDisplay(member)"
+                      >
+                        {{ getMemberInitial(member) }}
+                      </span>
+                      <span class="avatar avatar--extra" *ngIf="project.students.length > 3">
+                        +{{ project.students.length - 3 }}
+                      </span>
+                    </div>
+                    <span class="footer-value muted">{{ project.students.length }} members</span>
+                  </ng-container>
+                  <ng-template #noMembers>
+                    <span class="footer-value muted">No members yet</span>
+                  </ng-template>
                 </div>
               </div>
 
-              <div class="project-members">
-                <div class="avatar" *ngFor="let member of project.students">{{ member?.name || 'M' }}</div>
-                <div class="avatar avatar--extra" *ngIf="project.students?.length">
-                  {{ project.students.length }} members
+              <div class="project-card__bottom">
+                <div class="project-card__actions">
+                  <button class="card-icon-btn" type="button" aria-label="Edit project" (click)="openProjectForm(project)">
+                    <span class="icon icon-edit" aria-hidden="true"></span>
+                  </button>
+                  <button class="card-icon-btn danger" type="button" aria-label="Delete project" (click)="requestDelete(project)">
+                    <span class="icon icon-delete" aria-hidden="true"></span>
+                  </button>
                 </div>
               </div>
             </article>
           </section>
+
+          <div class="modal-backdrop" *ngIf="isFormOpen">
+            <div class="modal-card" role="dialog" aria-modal="true">
+              <header class="modal-header">
+                <div>
+                  <p class="projects-eyebrow">{{ editingProject ? 'Update entry' : 'New entry' }}</p>
+                  <h2>{{ editingProject ? 'Edit project' : 'Create project' }}</h2>
+                </div>
+                <button class="icon-button ghost" type="button" aria-label="Close" (click)="closeProjectForm()">&#10005;</button>
+              </header>
+
+              <form class="project-form" [formGroup]="projectForm" (ngSubmit)="submitProjectForm()">
+                <div class="form-row">
+                  <label for="projectTitle">Title</label>
+                  <input id="projectTitle" type="text" formControlName="title" placeholder="Enter project title" />
+                  <small class="field-error" *ngIf="projectForm.get('title')?.touched && projectForm.get('title')?.hasError('required')">
+                    Title is required
+                  </small>
+                </div>
+
+                <div class="form-group-inline">
+                  <div class="form-row">
+                    <label for="projectType">Type</label>
+                    <input id="projectType" type="text" formControlName="type" placeholder="e.g. PACTE" />
+                  </div>
+                  <div class="form-row">
+                    <label for="projectClass">Class</label>
+                    <input id="projectClass" type="text" formControlName="classe" placeholder="e.g. INDP1A" />
+                    <small class="field-error" *ngIf="projectForm.get('classe')?.touched && projectForm.get('classe')?.hasError('required')">
+                      Class is required
+                    </small>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <label for="projectSupervisor">Supervisor</label>
+                  <input id="projectSupervisor" type="text" formControlName="superviseur" placeholder="Supervisor name" />
+                  <small class="field-error" *ngIf="projectForm.get('superviseur')?.touched && projectForm.get('superviseur')?.hasError('required')">
+                    Supervisor is required
+                  </small>
+                </div>
+
+                <div class="form-row">
+                  <label for="projectStatus">Label</label>
+                  <select id="projectStatus" formControlName="status">
+                    <option *ngFor="let status of statusOptions" [value]="status">
+                      {{ status }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-row">
+                  <label for="projectDescription">Description</label>
+                  <textarea
+                    id="projectDescription"
+                    rows="3"
+                    formControlName="description"
+                    placeholder="Brief description"
+                  ></textarea>
+                </div>
+
+                <div class="form-row">
+                  <label>Members</label>
+                  <ng-container *ngIf="!isLoadingStudents && availableStudents.length; else membersState">
+                    <div class="members-control">
+                      <div class="members-control__selected" *ngIf="selectedStudents.length; else noSelection">
+                        <span class="selected-chip" *ngFor="let student of selectedStudents">
+                          <span class="selected-chip__name">{{ student?.name || student?.email }}</span>
+                          <span class="selected-chip__role">{{ student?.role || student?.program || 'Student' }}</span>
+                          <button
+                            class="chip-remove"
+                            type="button"
+                            aria-label="Remove student"
+                            (click)="removeStudent(student?.id)"
+                          >
+                            &#10005;
+                          </button>
+                        </span>
+                      </div>
+                      <ng-template #noSelection>
+                        <div class="members-control__empty">No members selected yet.</div>
+                      </ng-template>
+
+                      <div class="members-search">
+                        <input
+                          type="text"
+                          placeholder="Search students by name, email, or program..."
+                          [value]="memberSearchTerm"
+                          (input)="onMemberSearch($any($event.target).value)"
+                        />
+                        <button
+                          *ngIf="memberSearchTerm"
+                          class="clear-search"
+                          type="button"
+                          aria-label="Clear search text"
+                          (click)="clearMemberSearch()"
+                        >
+                          &#10005;
+                        </button>
+                      </div>
+
+                      <div class="members-suggestions" *ngIf="filteredStudents.length">
+                        <button
+                          type="button"
+                          class="suggestion-item"
+                          *ngFor="let student of filteredStudents"
+                          (click)="selectStudent(student)"
+                        >
+                          <span class="suggestion-item__name">{{ student?.name || student?.email }}</span>
+                          <span class="suggestion-item__meta">
+                            {{ student?.email }} &middot; {{ student?.role || student?.program || 'Student' }}
+                          </span>
+                        </button>
+                      </div>
+                      <div class="members-status members-status--empty" *ngIf="!filteredStudents.length && !memberSearchTerm">
+                        Everyone is already selected.
+                      </div>
+                      <div class="members-status members-status--empty" *ngIf="!filteredStudents.length && memberSearchTerm">
+                        No matches for "{{ memberSearchTerm }}".
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+
+                <ng-template #membersState>
+                  <div class="members-status" *ngIf="isLoadingStudents">Loading students...</div>
+                  <div class="members-status members-status--error" *ngIf="!isLoadingStudents && studentsError">
+                    {{ studentsError }}
+                  </div>
+                  <div class="members-status members-status--empty" *ngIf="!isLoadingStudents && !availableStudents.length && !studentsError">
+                    No students available.
+                  </div>
+                </ng-template>
+
+                <div class="form-error" *ngIf="formError">{{ formError }}</div>
+
+                <div class="form-actions">
+                  <button class="ghost-btn" type="button" (click)="closeProjectForm()" [disabled]="isSubmitting">Cancel</button>
+                  <button class="primary-btn" type="submit" [disabled]="isSubmitting">
+                    {{
+                      isSubmitting
+                        ? (editingProject ? 'Updating...' : 'Saving...')
+                        : editingProject
+                          ? 'Update project'
+                          : 'Save project'
+                    }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </section>
+
+        <div class="modal-backdrop confirm-backdrop" *ngIf="deleteTarget">
+          <div class="confirm-card" role="dialog" aria-modal="true">
+            <h3>Delete project</h3>
+            <p>
+              Are you sure you want to delete
+              <strong>{{ deleteTarget?.title }}</strong>?
+            </p>
+            <p class="confirm-subtext">This action cannot be undone.</p>
+            <div class="form-error" *ngIf="deleteError">{{ deleteError }}</div>
+            <div class="form-actions">
+              <button class="ghost-btn" type="button" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button>
+              <button class="danger-btn" type="button" (click)="deleteProject()" [disabled]="isDeleting">
+                {{ isDeleting ? 'Deleting...' : 'Delete project' }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

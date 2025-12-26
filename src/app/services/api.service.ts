@@ -15,6 +15,16 @@ interface SignupRequest {
   password: string;
 }
 
+interface CreateProjectRequest {
+  title: string;
+  type?: string;
+  classe: string;
+  superviseur: string;
+  description?: string;
+  status?: string;
+  students?: Array<{ id: number }>;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -39,5 +49,21 @@ export class ApiService {
 
   getProjects(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/Project/get`);
+  }
+
+  getUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/User/get`);
+  }
+
+  createProject(body: CreateProjectRequest): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Project/create`, body);
+  }
+
+  updateProject(id: number, body: CreateProjectRequest): Observable<any> {
+    return this.http.put(`${this.baseUrl}/Project/update/${id}`, body);
+  }
+
+  deleteProject(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/Project/delete/${id}`);
   }
 }

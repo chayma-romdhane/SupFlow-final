@@ -41,6 +41,8 @@ public class Project implements Serializable{
     private String superviseur;
     @Column(name = "Project_description")
     private String description;
+    @Column(name = "Project_status")
+    private String status;
     
     @ManyToMany
     @JoinTable(
@@ -54,13 +56,14 @@ public class Project implements Serializable{
     public Project() {
     
     }
-    public Project(String classe,List<User> students,String title ,String type,String superviseur, String description ) {
+    public Project(String classe,List<User> students,String title ,String type,String superviseur, String description, String status ) {
         this.students = students;
         this.classe = classe;
         this.title = title;
         this.type = type;
         this.superviseur = superviseur;
         this.description = description;
+        this.status = status;
     }
     
     public Long getId() {
@@ -82,6 +85,9 @@ public class Project implements Serializable{
     }
     public String getDescription() {
         return description;
+    }
+    public String getStatus() {
+        return status;
     }
     public List<User> getStudents() {
         return students;
@@ -110,6 +116,8 @@ public class Project implements Serializable{
     public void setDescription(String description) {
         this.description = description;
     }
-
+    public void setStatus(String status) {
+        this.status = status;
     }
 
+    }

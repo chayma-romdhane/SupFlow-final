@@ -15,10 +15,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.sjprogramming.restapi.repository.UserRepository;
 import com.sjprogramming.restapi.repository.ProjectRepository;
 import java.util.ArrayList;
@@ -74,6 +71,51 @@ public class Projectcontroller {
     public ResponseEntity<List<Project>> getAllProjects() {
         List<Project> lists = ProjectRepository.findAll();
         return ResponseEntity.ok(lists);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Project> updateProject(@PathVariable("id") Long id, @RequestBody Project updatedProject) {
+        try {
+            return ProjectRepository.findById(id).map(existingProject -> {
+                existingProject.setTitle(updatedProject.getTitle());
+                existingProject.setType(updatedProject.getType());
+                existingProject.setClasse(updatedProject.getClasse());
+                existingProject.setSuperviseur(updatedProject.getSuperviseur());
+                existingProject.setDescription(updatedProject.getDescription());
+                existingProject.setStatus(updatedProject.getStatus());
+
+                if (updatedProject.getStudents() != null) {
+                    List<Long> studentIds = new ArrayList<>();
+                    for (User student : updatedProject.getStudents()) {
+                        if (student != null && student.getId() != null) {
+                            studentIds.add(student.getId());
+                        }
+                    }
+                    List<User> fullStudents = studentRepository.findAllById(studentIds);
+                    existingProject.setStudents(fullStudents);
+                }
+
+                Project saved = ProjectRepository.save(existingProject);
+                return ResponseEntity.ok(saved);
+            }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        } catch (Exception e) {
+            System.out.println("error ==> " + e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<HttpStatus> deleteProject(@PathVariable("id") Long id) {
+        try {
+            if (!ProjectRepository.existsById(id)) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            ProjectRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            System.out.println("error ==> " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
