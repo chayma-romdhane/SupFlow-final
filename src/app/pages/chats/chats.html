@@ -1,0 +1,105 @@
+<div class="app-shell">
+  <div class="dashboard-page">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SupFlow Logo</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+        <a class="nav-item" routerLink="/projects" routerLinkActive="active">Projects</a>
+        <a class="nav-item" routerLink="/tasks" routerLinkActive="active">Tasks</a>
+        <a class="nav-item" routerLink="/work-logs" routerLinkActive="active">Work Logs</a>
+        <a class="nav-item" routerLink="/chats" routerLinkActive="active">Chats</a>
+        <a class="nav-item" routerLink="/settings" routerLinkActive="active">Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main-layout">
+            <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="search-pill">
+            <input type="search" placeholder="Search for anything..." />
+          </div>
+          <button class="notification-pill" type="button" aria-label="Notifications">
+            <span class="bell-icon" aria-hidden="true"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-chip__info">
+              <span class="user-chip__name">Chayma</span>
+              <span class="user-chip__role">student.supcom</span>
+            </div>
+            <span class="user-chip__avatar"></span>
+          </div>
+        </div>
+      </header>
+
+      <div class="chat-pane">
+        <section class="chat-sidebar">
+          <div class="chat-sidebar-header">
+            <div class="current-room">
+              <div class="room-avatar">P2</div>
+              <div>
+                <h3>P2M Team</h3>
+                <p>Nouveaux messages</p>
+              </div>
+            </div>
+            <button class="ghost-dot-btn" type="button">&#8942;</button>
+          </div>
+
+          <div class="chat-list">
+            <article class="contact-item" *ngFor="let contact of contacts">
+              <div class="contact-avatar">{{ contact.avatar }}</div>
+              <div class="contact-body">
+                <div class="contact-row">
+                  <strong>{{ contact.name }}</strong>
+                  <span class="contact-time">{{ contact.time }}</span>
+                </div>
+                <p>{{ contact.preview }}</p>
+              </div>
+              <span class="unread-badge" *ngIf="contact.unread">{{ contact.unread }}</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="chat-window">
+          <header class="chat-header">
+            <div>
+              <h2>Dr. Marc Zolghadri</h2>
+              <p>En ligne · il y a 5 min</p>
+            </div>
+            <div class="chat-header-actions">
+              <button type="button">&#128247;</button>
+              <button type="button">&#128222;</button>
+            </div>
+          </header>
+
+          <div class="message-thread">
+            <ng-container *ngFor="let message of messages; let i = index">
+              <div class="day-divider" *ngIf="message.dayLabel">
+                <span>{{ message.dayLabel }}</span>
+              </div>
+              <div
+                class="message-bubble"
+                [class.message-bubble--left]="message.position === 'left'"
+                [class.message-bubble--right]="message.position === 'right'"
+              >
+                <p>{{ message.text }}</p>
+                <span class="message-time">{{ message.time }}</span>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="chat-input">
+            <button class="icon-button" type="button">&#43;</button>
+            <input type="text" placeholder="Message" />
+            <button class="icon-button" type="button">&#10148;</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

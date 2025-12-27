@@ -1,0 +1,109 @@
+<div class="app-shell">
+  <div class="dashboard-page">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SupFlow Logo</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+        <a class="nav-item" routerLink="/projects" routerLinkActive="active">Projects</a>
+        <a class="nav-item" routerLink="/tasks" routerLinkActive="active">Tasks</a>
+        <a class="nav-item" routerLink="/work-logs" routerLinkActive="active">Work Logs</a>
+        <a class="nav-item" routerLink="/chats" routerLinkActive="active">Chats</a>
+        <a class="nav-item" routerLink="/settings" routerLinkActive="active">Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main-layout">
+            <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="search-pill">
+            <input type="search" placeholder="Search for anything..." />
+          </div>
+          <button class="notification-pill" type="button" aria-label="Notifications">
+            <span class="bell-icon" aria-hidden="true"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-chip__info">
+              <span class="user-chip__name">Chayma</span>
+              <span class="user-chip__role">student.supcom</span>
+            </div>
+            <span class="user-chip__avatar"></span>
+          </div>
+        </div>
+      </header>
+
+      <div class="worklogs-content">
+        <section class="calendar-panel">
+          <header class="calendar-toolbar">
+            <div class="filter-group">
+              <button type="button" class="filter-btn">Day</button>
+              <button type="button" class="filter-btn">Month</button>
+              <button type="button" class="filter-btn">Year</button>
+              <button type="button" class="filter-btn">Project</button>
+              <button type="button" class="filter-btn">Priority</button>
+            </div>
+            <div class="calendar-actions">
+              <div class="nav-buttons">
+                <button type="button" aria-label="Previous">&#10094;</button>
+                <button type="button" aria-label="Next">&#10095;</button>
+              </div>
+              <button class="tag-button" type="button">This Month &#9662;</button>
+              <button class="primary-btn" type="button">+ Add Event</button>
+            </div>
+          </header>
+
+          <div class="calendar-grid">
+            <div class="calendar-row calendar-row--head">
+              <span *ngFor="let day of ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']">{{ day }}</span>
+            </div>
+            <div class="calendar-row" *ngFor="let week of calendarWeeks">
+              <div class="calendar-cell" *ngFor="let day of week" [class.calendar-cell--muted]="!day.isCurrentMonth">
+                <div class="cell-date">{{ day.date || '' }}</div>
+                <div class="cell-events">
+                  <span *ngFor="let event of day.events" [ngClass]="getEventClass(event)">
+                    {{ event.title }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="summary-panel">
+          <div class="worklog-stat-card">
+            <div class="stat-header">
+              <span>Total Work Logged</span>
+              <button class="ghost-dot-btn" type="button">&#8942;</button>
+            </div>
+            <div class="stat-circle">
+              <div class="stat-inner">
+                <span class="stat-label">Statistics</span>
+                <strong>5w·2d</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="notifications-card">
+            <header class="notifications-header">
+              <h3>Notifications</h3>
+              <button type="button">View all</button>
+            </header>
+            <div class="notification-item" *ngFor="let note of notifications">
+              <div class="notification-avatar">{{ note.avatar }}</div>
+              <div class="notification-body">
+                <p class="notification-title">{{ note.user }}</p>
+                <p class="notification-message">{{ note.message }}</p>
+                <span class="notification-time">{{ note.time }}</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

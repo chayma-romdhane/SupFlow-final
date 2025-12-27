@@ -17,13 +17,16 @@
         <a class="nav-item" routerLink="/projects" routerLinkActive="active">
           <span>Projects</span>
         </a>
-        <a class="nav-item" href="#">
+        <a class="nav-item" routerLink="/tasks" routerLinkActive="active">
           <span>Tasks</span>
         </a>
-        <a class="nav-item" href="#">
+        <a class="nav-item" routerLink="/work-logs" routerLinkActive="active">
           <span>Work Logs</span>
         </a>
-        <a class="nav-item" href="#">
+        <a class="nav-item" routerLink="/chats" routerLinkActive="active">
+          <span>Chats</span>
+        </a>
+        <a class="nav-item" routerLink="/settings" routerLinkActive="active">
           <span>Settings</span>
         </a>
       </nav>
@@ -32,21 +35,21 @@
     
     <div class="main-layout">
       
-      <header class="topbar">
-        <div class="topbar-left">
-          
-        </div>
+            <header class="topbar">
+        <div class="topbar-left"></div>
         <div class="topbar-right">
-          <div class="search-box">
+          <div class="search-pill">
             <input type="search" placeholder="Search for anything..." />
           </div>
-          <button class="icon-button" aria-label="Notifications">🔔</button>
-          <div class="user-info">
-            <div class="user-text">
-              <span class="user-name">Chayma</span>
-              <span class="user-role">Student · Sup'Com</span>
+          <button class="notification-pill" type="button" aria-label="Notifications">
+            <span class="bell-icon" aria-hidden="true"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-chip__info">
+              <span class="user-chip__name">Chayma</span>
+              <span class="user-chip__role">student.supcom</span>
             </div>
-            <div class="user-avatar">C</div>
+            <span class="user-chip__avatar"></span>
           </div>
         </div>
       </header>
@@ -256,3 +259,6 @@
     </div>
   </div>
 </div>
+
+
+

@@ -16,37 +16,43 @@
         <a class="nav-item" routerLink="/projects" routerLinkActive="active">
           <span>Projects</span>
         </a>
-        <a class="nav-item" href="#">
+        <a class="nav-item" routerLink="/tasks" routerLinkActive="active">
           <span>Tasks</span>
         </a>
-        <a class="nav-item" href="#">
+        <a class="nav-item" routerLink="/work-logs" routerLinkActive="active">
           <span>Work Logs</span>
         </a>
-        <a class="nav-item" href="#">
+        <a class="nav-item" routerLink="/chats" routerLinkActive="active">
+          <span>Chats</span>
+        </a>
+        <a class="nav-item" routerLink="/settings" routerLinkActive="active">
           <span>Settings</span>
         </a>
       </nav>
     </aside>
 
     <div class="main-layout">
-      <header class="topbar">
+            <header class="topbar">
         <div class="topbar-left"></div>
         <div class="topbar-right">
-          <div class="search-box">
+          <div class="search-pill">
             <input type="search" placeholder="Search for anything..." />
           </div>
-          <button class="icon-button" aria-label="Notifications">&#128276;</button>
-              <div class="user-info">
-                <div class="user-text">
-                  <span class="user-name">Chayma</span>
-                  <span class="user-role">Student &#64; Sup'Com</span>
-                </div>
-                <div class="user-avatar">C</div>
-              </div>
+          <button class="notification-pill" type="button" aria-label="Notifications">
+            <span class="bell-icon" aria-hidden="true"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-chip__info">
+              <span class="user-chip__name">Chayma</span>
+              <span class="user-chip__role">student.supcom</span>
             </div>
-          </header>
+            <span class="user-chip__avatar"></span>
+          </div>
+        </div>
+      </header>
 
       <div class="main-card">
+        <ng-container *ngIf="!isWorkspaceOpen; else workspaceView">
         <section class="projects-page">
           <header class="projects-header">
             <div class="projects-header__text">
@@ -72,7 +78,7 @@
             <div *ngIf="!isLoading && errorMessage" class="info error">{{ errorMessage }}</div>
             <div *ngIf="!isLoading && !errorMessage && projects.length === 0" class="info">No projects found.</div>
 
-            <article class="project-card" *ngFor="let project of projects">
+            <article class="project-card" *ngFor="let project of projects" (click)="openWorkspace(project)">
               <div class="project-card__header">
                 <div>
                   <p class="project-label">Project</p>
@@ -130,10 +136,20 @@
 
               <div class="project-card__bottom">
                 <div class="project-card__actions">
-                  <button class="card-icon-btn" type="button" aria-label="Edit project" (click)="openProjectForm(project)">
+                  <button
+                    class="card-icon-btn"
+                    type="button"
+                    aria-label="Edit project"
+                    (click)="openProjectForm(project); $event.stopPropagation()"
+                  >
                     <span class="icon icon-edit" aria-hidden="true"></span>
                   </button>
-                  <button class="card-icon-btn danger" type="button" aria-label="Delete project" (click)="requestDelete(project)">
+                  <button
+                    class="card-icon-btn danger"
+                    type="button"
+                    aria-label="Delete project"
+                    (click)="requestDelete(project); $event.stopPropagation()"
+                  >
                     <span class="icon icon-delete" aria-hidden="true"></span>
                   </button>
                 </div>
@@ -292,6 +308,275 @@
             </div>
           </div>
         </section>
+        </ng-container>
+
+        <ng-template #workspaceView>
+          <section class="projects-page workspace-page">
+            <header class="workspace-header">
+              <div class="workspace-header__primary">
+                <button class="workspace-back" type="button" aria-label="Back to projects" (click)="closeWorkspace()">
+                  &#8592;
+                </button>
+                <div>
+                  <p class="workspace-path">Projects / Kanban Board</p>
+                  <h2>{{ workspaceProject?.title || 'P2M Project Workspace' }}</h2>
+                  <p>Manage your academic tasks across stages of completion.</p>
+                </div>
+              </div>
+            </header>
+
+            <div class="workspace-meta-row">
+              <div class="workspace-search workspace-search-card">
+                <span class="search-icon">&#128269;</span>
+                <input type="search" placeholder="Search tasks..." />
+              </div>
+              <div class="workspace-meta-cards">
+                <div class="workspace-context__item">
+                  <span class="label">Supervisor</span>
+                  <span class="value">{{ workspaceProject?.superviseur || 'SupFlow Faculty' }}</span>
+                </div>
+                <div class="workspace-context__item">
+                  <span class="label">Class</span>
+                  <span class="value">{{ workspaceProject?.classe || 'INDP1A' }}</span>
+                </div>
+                <div class="workspace-context__item">
+                  <span class="label">Status</span>
+                  <span class="badge">{{ workspaceProject?.status || 'In progress' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="workspace-board">
+              <div
+                class="kanban-column"
+                *ngFor="let column of activeWorkspaceColumns"
+                [class.kanban-column--drag-over]="dragHoverColumnId === column.id"
+              >
+                <div class="kanban-column__header">
+                  <div>
+                    <p class="column-label">{{ column.title }}</p>
+                    <p class="column-helper">{{ column.helper }}</p>
+                  </div>
+                  <button class="kanban-add" type="button" aria-label="Add task">+</button>
+                </div>
+
+                <div
+                  class="kanban-column__body"
+                  (dragover)="allowTaskDrop($event)"
+                  (dragenter)="onColumnDragEnter(column.id, $event)"
+                  (dragleave)="onColumnDragLeave(column.id, $event)"
+                  (drop)="onTaskDrop(column.id, $event)"
+                >
+                <button class="kanban-dropzone" type="button" (click)="openTaskModal(column.id); $event.stopPropagation()">+ Add task card</button>
+
+                  <article
+                    class="kanban-card"
+                    *ngFor="let task of column.tasks"
+                    draggable="true"
+                    (dragstart)="onTaskDragStart($event, column.id, task)"
+                    (dragend)="onTaskDragEnd()"
+                    (click)="openTaskModal(column.id, task); $event.stopPropagation()"
+                  >
+                    <p class="task-chip" *ngIf="task.label">{{ task.label }}</p>
+                    <div class="kanban-card__top">
+                      <h3>{{ task.title }}</h3>
+                      <span class="card-chip" *ngIf="task.statusLabel">{{ task.statusLabel }}</span>
+                    </div>
+                    <p class="kanban-card__description">{{ task.description }}</p>
+
+                    <div class="kanban-meta">
+                      <span class="kanban-duration">{{ task.duration }}</span>
+                      <div class="kanban-stats">
+                        <span class="stat-item">&#128172; {{ task.stats.comments }}</span>
+                        <span class="stat-item">&#128206; {{ task.stats.files }}</span>
+                        <span class="stat-item" *ngIf="task.stats.updates">&#9881;&#65039; {{ task.stats.updates }}</span>
+                      </div>
+                    </div>
+
+                    <div class="kanban-card__footer">
+                      <div class="avatar-stack">
+                        <span
+                          class="avatar avatar--sm"
+                          *ngFor="let avatar of task.avatars; let idx = index"
+                          [style.zIndex]="5 - idx"
+                        >
+                          {{ avatar }}
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <div class="task-modal-backdrop" *ngIf="isTaskModalOpen">
+              <div class="task-modal-card" role="dialog" aria-modal="true">
+                <form class="task-detail-form" [formGroup]="taskForm" (ngSubmit)="submitTaskForm()">
+                  <header class="task-modal-header">
+                    <div class="task-header-left">
+                      <p class="task-eyebrow">
+                        Projects / {{ selectedTaskColumnTitle || 'Task' }}
+                        <span *ngIf="selectedTask?.id">/ {{ selectedTask?.id }}</span>
+                      </p>
+                      <input
+                        id="taskTitle"
+                        type="text"
+                        class="task-title-input"
+                        formControlName="title"
+                        placeholder="Enter task title"
+                      />
+                      <small class="field-error" *ngIf="taskForm.get('title')?.touched && taskForm.get('title')?.invalid">
+                        Title is required
+                      </small>
+                      <div class="task-label-inline">
+                        <label for="taskLabel">Label</label>
+                        <input id="taskLabel" type="text" formControlName="label" placeholder="e.g. Research" />
+                      </div>
+                    </div>
+                    <div class="task-header-right">
+                      <div class="task-duration-chip">
+                        <input id="taskDuration" type="text" formControlName="duration" placeholder="10 Days" />
+                        <span class="duration-icon">&#9658;</span>
+                      </div>
+                      <button class="icon-button ghost close-btn" type="button" aria-label="Close task dialog" (click)="closeTaskModal()">&#10005;</button>
+                    </div>
+                  </header>
+
+                  <div class="task-meta">
+                    <div class="task-meta-row">
+                      <div class="task-meta-card task-meta-card--priority">
+                      <span class="meta-label">Priority</span>
+                      <select
+                        id="taskPriority"
+                        class="priority-select"
+                        formControlName="priority"
+                        [ngClass]="getPriorityPillClass(taskForm.get('priority')?.value)"
+                      >
+                        <option *ngFor="let priority of priorityOptions" [value]="priority">
+                          {{ priority }}
+                        </option>
+                      </select>
+                    </div>
+                      <div class="task-meta-card">
+                      <span class="meta-label">Owner</span>
+                      <div class="owner-input">
+                        <span class="owner-avatar">{{ getOwnerInitials(taskForm.get('owner')?.value || selectedTask?.owner) }}</span>
+                        <input id="taskOwner" type="text" formControlName="owner" placeholder="Assignee name" />
+                      </div>
+                    </div>
+                      <div class="task-meta-card">
+                      <span class="meta-label">Member assigned</span>
+                      <div class="member-stack detailed-stack">
+                        <span
+                          class="avatar avatar--sm"
+                          *ngFor="let avatar of taskModalAvatars; let idx = index"
+                          [style.zIndex]="5 - idx"
+                        >
+                          {{ avatar }}
+                        </span>
+                        <button class="add-member-btn" type="button" aria-label="Add member">+</button>
+                      </div>
+                    </div>
+                    </div>
+                    <div class="task-meta-row">
+                      <div class="task-meta-card task-meta-card--date">
+                        <span class="meta-label">Due date</span>
+                        <div class="date-input">
+                          <input id="taskDue" type="date" formControlName="dueDate" />
+                          <span class="date-friendly">{{ formatDueDate(taskForm.get('dueDate')?.value || selectedTask?.dueDate) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="task-sections">
+                    <section class="task-panel attachments-panel">
+                      <header class="panel-header">
+                        <div>
+                          <h4>Attachments</h4>
+                          <p>Docs, specs, or additional context.</p>
+                        </div>
+                        <button class="upload-link" type="button">
+                          <span class="upload-icon">+</span>
+                          Upload Deliverable
+                        </button>
+                      </header>
+                      <div class="attachment-list" *ngIf="selectedTask?.attachments?.length; else emptyAttachments">
+                        <a
+                          class="attachment-item"
+                          *ngFor="let file of selectedTask?.attachments"
+                          [attr.href]="file.url || '#'"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <span class="attachment-icon" aria-hidden="true">&#128206;</span>
+                          <div class="attachment-item__body">
+                            <span class="attachment-name">{{ file.name }}</span>
+                            <span class="attachment-meta">{{ getAttachmentExt(file.name) }}</span>
+                          </div>
+                          <span class="attachment-arrow" aria-hidden="true">&#10132;</span>
+                        </a>
+                      </div>
+                      <ng-template #emptyAttachments>
+                        <p class="attachment-empty">No attachments yet.</p>
+                      </ng-template>
+                    </section>
+
+                    <section class="task-panel description-panel">
+                      <label for="taskDescription">Description</label>
+                      <textarea
+                        id="taskDescription"
+                        rows="4"
+                        formControlName="description"
+                        placeholder="Describe the task, attachments, or comments..."
+                      ></textarea>
+                    </section>
+
+                    <section class="task-panel comment-panel">
+                      <header class="comment-header">
+                        <div class="owner-avatar owner-avatar--lg">
+                          {{ getOwnerInitials(taskForm.get('owner')?.value || selectedTask?.owner) }}
+                        </div>
+                        <div class="comment-meta">
+                          <span class="comment-style-label">Normal Text</span>
+                          <div class="comment-toolbar">
+                            <button type="button" aria-label="Bold">B</button>
+                            <button type="button" aria-label="Italic">I</button>
+                            <button type="button" aria-label="List">&#8226;</button>
+                            <button type="button" aria-label="Link">&#128279;</button>
+                            <button type="button" aria-label="Code">&#60;&#62;</button>
+                          </div>
+                        </div>
+                      </header>
+                      <textarea
+                        class="comment-input"
+                        rows="3"
+                        placeholder="Add Attachment or add comment to describe the issues..."
+                      ></textarea>
+                    </section>
+                  </div>
+
+                  <div class="task-modal-actions">
+                    <button type="button" class="ghost-btn ghost-btn--lg" (click)="closeTaskModal()">Close</button>
+                    <button class="primary-btn primary-btn--lg" type="submit">
+                      {{ isCreatingTask ? 'Create task' : 'Save task' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="workspace-pagination">
+              <button class="ghost-btn ghost-btn--sm" type="button">&#8592; Previous</button>
+              <div class="page-list">
+                <button class="page-dot active" type="button">1</button>
+                <button class="page-dot" type="button">2</button>
+                <button class="page-dot" type="button">3</button>
+              </div>
+              <button class="ghost-btn ghost-btn--sm" type="button">Next &#8594;</button>
+            </div>
+          </section>
+        </ng-template>
 
         <div class="modal-backdrop confirm-backdrop" *ngIf="deleteTarget">
           <div class="confirm-card" role="dialog" aria-modal="true">
@@ -314,3 +599,6 @@
     </div>
   </div>
 </div>
+
+
+

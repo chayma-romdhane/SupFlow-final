@@ -1,0 +1,106 @@
+<div class="app-shell">
+  <div class="dashboard-page">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SupFlow Logo</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+        <a class="nav-item" routerLink="/projects" routerLinkActive="active">Projects</a>
+        <a class="nav-item" routerLink="/tasks" routerLinkActive="active">Tasks</a>
+        <a class="nav-item" routerLink="/work-logs" routerLinkActive="active">Work Logs</a>
+        <a class="nav-item" routerLink="/chats" routerLinkActive="active">Chats</a>
+        <a class="nav-item" routerLink="/settings" routerLinkActive="active">Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main-layout">
+            <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="search-pill">
+            <input type="search" placeholder="Search for anything..." />
+          </div>
+          <button class="notification-pill" type="button" aria-label="Notifications">
+            <span class="bell-icon" aria-hidden="true"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-chip__info">
+              <span class="user-chip__name">Chayma</span>
+              <span class="user-chip__role">student.supcom</span>
+            </div>
+            <span class="user-chip__avatar"></span>
+          </div>
+        </div>
+      </header>
+
+      <div class="settings-content">
+        <section class="profile-card">
+          <div class="profile-header">
+            <img src="assets/settings-profile.jpg" alt="Profile" />
+            <h2>Chayma Romdhane</h2>
+            <div class="profile-stats">
+              <div>
+                <span>{{ stats.tasks }}</span>
+                <small>Tasks</small>
+              </div>
+              <div>
+                <span>{{ stats.projects }}</span>
+                <small>Projects</small>
+              </div>
+            </div>
+          </div>
+          <div class="profile-info">
+            <h3>Personal Information</h3>
+            <p><strong>Name:</strong> Chayma Romdhane</p>
+            <p><strong>Email:</strong> chayma.romdhane&#64;supcom.tn</p>
+            <p><strong>Role:</strong> Student</p>
+            <p><strong>ID:</strong> 777256378</p>
+            <p><strong>Contact:</strong> +216 53 593 303</p>
+            <p><strong>Address:</strong> Bizerte</p>
+            <p><strong>Country:</strong> Tunisia</p>
+          </div>
+          <button class="primary-btn" type="button">Edit</button>
+        </section>
+
+        <section class="projects-card">
+          <h3>List of Projects</h3>
+          <div class="projects-table">
+            <div class="projects-row projects-row--head">
+              <span>Projects</span>
+              <span>Total Tasks</span>
+              <span>Progress</span>
+              <span>Hours</span>
+            </div>
+            <div class="projects-row" *ngFor="let project of projects">
+              <span>{{ project.name }}</span>
+              <span>{{ project.tasks }}</span>
+              <span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="project.progress"></div>
+                </div>
+                {{ project.progress }}%
+              </span>
+              <span>{{ project.hours }}</span>
+            </div>
+          </div>
+          <section class="notifications-card">
+            <h3>Recent Notifications</h3>
+            <article class="notification-item" *ngFor="let notification of notifications">
+              <span class="dot" [ngClass]="'dot--' + notification.color"></span>
+              <div class="notification-body">
+                <div class="notification-title">{{ notification.title }}</div>
+                <p>{{ notification.message }}</p>
+                <a *ngIf="notification.attachment" href="#">{{ notification.attachment }}</a>
+              </div>
+              <span class="notification-time">{{ notification.time }}</span>
+            </article>
+          </section>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

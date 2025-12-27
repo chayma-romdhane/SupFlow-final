@@ -1,0 +1,199 @@
+<div class="app-shell">
+  <div class="dashboard-page">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SupFlow Logo</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a
+          class="nav-item"
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/projects" routerLinkActive="active">
+          <span>Projects</span>
+        </a>
+        <a class="nav-item" routerLink="/tasks" routerLinkActive="active">
+          <span>Tasks</span>
+        </a>
+        <a class="nav-item" routerLink="/work-logs" routerLinkActive="active">
+          <span>Work Logs</span>
+        </a>
+        <a class="nav-item" routerLink="/chats" routerLinkActive="active">
+          <span>Chats</span>
+        </a>
+        <a class="nav-item" routerLink="/settings" routerLinkActive="active">
+          <span>Settings</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="main-layout">
+            <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <div class="search-pill">
+            <input type="search" placeholder="Search for anything..." />
+          </div>
+          <button class="notification-pill" type="button" aria-label="Notifications">
+            <span class="bell-icon" aria-hidden="true"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-chip__info">
+              <span class="user-chip__name">Chayma</span>
+              <span class="user-chip__role">student.supcom</span>
+            </div>
+            <span class="user-chip__avatar"></span>
+          </div>
+        </div>
+      </header>
+
+      <div class="tasks-card">
+        <header class="tasks-header">
+          <div>
+            <p class="tasks-eyebrow">My Tasks</p>
+            <h1>Weekly Sprint Tracking</h1>
+            <p>Keep an eye on sprint deliverables, durations, and collaborators.</p>
+          </div>
+          <div class="tasks-toolbar">
+            <div class="search-inline">
+              <span class="search-inline-icon">&#128269;</span>
+              <input type="search" placeholder="Search task..." />
+            </div>
+            <button class="toolbar-btn" type="button">
+              Priority
+              <span class="caret">&#9662;</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="tasks-list">
+          <article class="task-row" *ngFor="let task of tasks" (click)="openTaskDetail(task)" tabindex="0">
+            <div class="task-row__primary">
+              <div class="task-icon" aria-hidden="true">&#9881;</div>
+              <div>
+                <div class="task-row__title">
+                  <h3>{{ task.title }}</h3>
+                  <div class="task-row__chips">
+                    <span [ngClass]="getStageClass(task.stage)">{{ task.stage }}</span>
+                    <span [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                  </div>
+                </div>
+                <p class="task-row__description">{{ task.description }}</p>
+              </div>
+            </div>
+            <div class="task-row__meta">
+              <span class="duration-wrapper" [ngClass]="getDurationClass(task)">
+                <span class="duration-icon" aria-hidden="true">&#9201;</span>
+                {{ task.duration }}
+              </span>
+              <div class="task-meta-items">
+                <span class="meta-item" aria-label="Checklist">
+                  <span class="meta-icon">&#9776;</span>
+                  <span class="meta-count">{{ task.updates }}</span>
+                </span>
+                <span class="meta-item" aria-label="Comments">
+                  <span class="meta-icon meta-icon--comments" aria-hidden="true"></span>
+                  <span class="meta-count">{{ task.comments }}</span>
+                </span>
+              </div>
+              <span class="assignee-avatar">{{ task.assigneeInitials }}</span>
+            </div>
+          </article>
+        </section>
+
+        <div class="tasks-pagination">
+          <button type="button" class="ghost-btn ghost-btn--sm">Previous</button>
+          <div class="page-dots">
+            <button type="button" class="page-dot active">1</button>
+            <button type="button" class="page-dot">2</button>
+            <button type="button" class="page-dot">3</button>
+          </div>
+          <button type="button" class="ghost-btn ghost-btn--sm">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="task-detail-backdrop" *ngIf="isDetailOpen" (click)="closeTaskDetail()">
+  <div class="task-detail-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="task-detail-header">
+      <div>
+        <p class="detail-path">Project / Task ID {{ selectedTask?.id }}</p>
+        <h2>{{ selectedTask?.title }}</h2>
+      </div>
+      <div class="detail-header-meta">
+        <span class="detail-duration">{{ selectedTask?.duration }}</span>
+        <button type="button" class="icon-button ghost" aria-label="Close task detail" (click)="closeTaskDetail()">&#10005;</button>
+      </div>
+    </header>
+
+    <div class="detail-chips">
+      <span *ngIf="selectedTask" [ngClass]="getPriorityClass(selectedTask.priority)">{{ selectedTask.priority }}</span>
+      <span *ngIf="selectedTask" [ngClass]="getStageClass(selectedTask.stage)">{{ selectedTask.stage }}</span>
+    </div>
+
+    <div class="detail-info-grid">
+      <div class="detail-info">
+        <span class="detail-label">Owner</span>
+        <span class="detail-value">{{ selectedTask?.assignee }}</span>
+      </div>
+      <div class="detail-info">
+        <span class="detail-label">Reviewer</span>
+        <span class="detail-value">{{ selectedTask?.reviewer }}</span>
+      </div>
+      <div class="detail-info">
+        <span class="detail-label">Due Date</span>
+        <span class="detail-value">{{ selectedTask?.dueDate }}</span>
+      </div>
+    </div>
+
+    <section class="detail-section">
+      <header class="detail-section-header">
+        <h3>Attachments</h3>
+        <button class="upload-link" type="button">
+          <span class="upload-icon">+</span>
+          Upload Deliverable
+        </button>
+      </header>
+      <div class="detail-attachments">
+        <a
+          class="detail-attachment"
+          *ngFor="let attachment of selectedTask?.attachments"
+          href="#"
+          (click)="$event.preventDefault()"
+        >
+          <span class="attachment-icon" aria-hidden="true">&#128206;</span>
+          {{ attachment }}
+        </a>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <header class="detail-section-header">
+        <h3>Description</h3>
+      </header>
+      <p class="detail-text">{{ selectedTask?.details }}</p>
+    </section>
+
+    <section class="detail-section">
+      <header class="detail-section-header">
+        <h3>Notes</h3>
+      </header>
+      <p class="detail-text">{{ selectedTask?.notes }}</p>
+    </section>
+
+    <div class="detail-update">
+      <span class="detail-avatar">{{ selectedTask?.assigneeInitials }}</span>
+      <textarea rows="2" placeholder="Add update..."></textarea>
+      <button type="button" class="primary-btn primary-btn--lg">Send</button>
+    </div>
+  </div>
+</div>
+
+
+

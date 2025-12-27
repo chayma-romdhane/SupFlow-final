@@ -4,6 +4,32 @@ import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 
+interface WorkspaceTask {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  stats: {
+    comments: number;
+    files: number;
+    updates?: number;
+  };
+  avatars: string[];
+  statusLabel?: string;
+  label?: string;
+  priority?: string;
+  owner?: string;
+  dueDate?: string;
+  attachments?: { name: string; url?: string }[];
+}
+
+interface WorkspaceColumn {
+  id: string;
+  title: string;
+  helper: string;
+  tasks: WorkspaceTask[];
+}
+
 @Component({
   selector: 'app-projects',
   standalone: true,
@@ -32,11 +58,182 @@ export class ProjectsComponent implements OnInit {
   isDeleting = false;
 
   statusOptions = ['In progress', 'Completed', 'On hold'];
+  priorityOptions = ['Low', 'Medium', 'High'];
+  isWorkspaceOpen = false;
+  workspaceProject: any | null = null;
+  activeWorkspaceColumns: WorkspaceColumn[] = [];
+  dragContext: { columnId: string; task: WorkspaceTask } | null = null;
+  dragHoverColumnId: string | null = null;
+  isTaskModalOpen = false;
+  isCreatingTask = false;
+  taskForm!: FormGroup;
+  selectedTask: WorkspaceTask | null = null;
+  selectedTaskColumnId: string | null = null;
+
+  private readonly workspaceColumnsTemplate: WorkspaceColumn[] = [
+    {
+      id: 'backlog',
+      title: 'Backlog',
+      helper: 'Plan tasks before they enter execution',
+      tasks: [
+        {
+          id: 'task-backlog-1',
+          title: 'Literature Review & State of the Art',
+          description: 'Explore recent research on AI-based waste classification and smart recycling.',
+          duration: '10 Days',
+          priority: 'Low',
+          owner: 'Chayma',
+          dueDate: '2025-04-12',
+          label: 'Research',
+          stats: { comments: 2, files: 8, updates: 4 },
+          avatars: ['Ch', 'Om', 'Li', 'Sa'],
+          attachments: [
+            { name: 'resources-1.pdf', url: '#' },
+            { name: 'resources-2.pdf', url: '#' },
+          ],
+        },
+        {
+          id: 'task-backlog-2',
+          title: 'Dataset Collection & Annotation',
+          description: 'Gather waste imagery (plastic, metal, paper) and annotate samples in CVAT.',
+          duration: '14 Days',
+          priority: 'Medium',
+          owner: 'Omar',
+          dueDate: '2025-05-02',
+          label: 'Dataset',
+          stats: { comments: 3, files: 6, updates: 5 },
+          avatars: ['Ch', 'Az', 'Ka', 'Ri'],
+          attachments: [
+            { name: 'dataset-guide.pdf', url: '#' },
+            { name: 'collection-plan.docx', url: '#' },
+          ],
+        },
+        {
+          id: 'task-backlog-3',
+          title: 'System Architecture Design',
+          description: 'Define camera module, microcontroller / Raspberry Pi pipeline, plus dashboards.',
+          duration: '8 Days',
+          priority: 'High',
+          owner: 'Sahar',
+          dueDate: '2025-04-28',
+          label: 'Architecture',
+          stats: { comments: 4, files: 4, updates: 3 },
+          avatars: ['Sa', 'Em', 'Ot', 'Fa'],
+          attachments: [
+            { name: 'architecture-draft.fig', url: '#' },
+            { name: 'raspberry-pi-flow.png', url: '#' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'in-progress',
+      title: 'In progress',
+      helper: 'Track execution across the team',
+      tasks: [
+        {
+          id: 'task-progress-1',
+          title: 'Data Pre-Processing & Augmentation',
+          description: 'Resize, normalize, flip and rotate samples. Balance classes for training.',
+          duration: '7 Days',
+          priority: 'Medium',
+          owner: 'Mohamed',
+          dueDate: '2025-04-19',
+          label: 'Pipeline',
+          stats: { comments: 2, files: 2, updates: 4 },
+          avatars: ['Ch', 'Mo', 'Sa', 'Li'],
+          attachments: [{ name: 'augmentation-notes.pdf', url: '#' }],
+        },
+        {
+          id: 'task-progress-2',
+          title: 'Model Training & Evaluation',
+          description: 'Train YOLOv8 + MobileNet, evaluate recall, F1-score and learning curves.',
+          duration: '12 Days',
+          priority: 'High',
+          owner: 'Anis',
+          dueDate: '2025-05-10',
+          label: 'AI',
+          stats: { comments: 3, files: 5, updates: 6 },
+          avatars: ['Mo', 'An', 'Sa', 'Is'],
+          attachments: [
+            { name: 'training-log.xlsx', url: '#' },
+            { name: 'evaluation-report.pdf', url: '#' },
+          ],
+        },
+        {
+          id: 'task-progress-3',
+          title: 'Hardware Integration',
+          description: 'Connect the camera module to Raspberry Pi, add motor control for sorting.',
+          duration: '10 Days',
+          priority: 'Low',
+          owner: 'Hedia',
+          dueDate: '2025-05-01',
+          label: 'Hardware',
+          stats: { comments: 2, files: 4, updates: 2 },
+          avatars: ['He', 'Ra', 'Mo', 'Sa'],
+          attachments: [{ name: 'wiring-diagram.png', url: '#' }],
+        },
+      ],
+    },
+    {
+      id: 'completed',
+      title: 'Completed',
+      helper: 'Validated milestones',
+      tasks: [
+        {
+          id: 'task-complete-1',
+          title: 'Problem Definition & Requirements',
+          description: 'Define objectives, functional & non-functional requirements plus success metrics.',
+          duration: 'Completed',
+          priority: 'Low',
+          owner: 'Chayma',
+          dueDate: '2025-03-01',
+          label: 'Milestone',
+          stats: { comments: 7, files: 2, updates: 1 },
+          avatars: ['Ch', 'Sa', 'He', 'Mo'],
+          statusLabel: 'Completed',
+          attachments: [{ name: 'requirements.docx', url: '#' }],
+        },
+        {
+          id: 'task-complete-2',
+          title: 'Project Topic Validation',
+          description: 'Present project scope to supervisors, validate feasibility and available resources.',
+          duration: 'Completed',
+          priority: 'Medium',
+          owner: 'Sahar',
+          dueDate: '2025-03-18',
+          label: 'Approval',
+          stats: { comments: 5, files: 0, updates: 2 },
+          avatars: ['Sa', 'Em', 'Mo', 'Az'],
+          statusLabel: 'Completed',
+          attachments: [{ name: 'validation-slides.pdf', url: '#' }],
+        },
+        {
+          id: 'task-complete-3',
+          title: 'Project Timeline & Sprint Planning',
+          description: 'Define milestones, sprint cadence, assign roles, and identify deliverables.',
+          duration: 'Completed',
+          priority: 'Low',
+          owner: 'Chayma',
+          dueDate: '2025-03-25',
+          label: 'Planning',
+          stats: { comments: 6, files: 8, updates: 3 },
+          avatars: ['Ch', 'Sa', 'Mo', 'He'],
+          statusLabel: 'Completed',
+          attachments: [
+            { name: 'timeline.xlsx', url: '#' },
+            { name: 'roles-overview.pdf', url: '#' },
+          ],
+        },
+      ],
+    },
+  ];
 
   constructor(private api: ApiService, private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.buildForm();
+    this.buildTaskForm();
     this.fetchProjects();
     this.fetchStudents();
   }
@@ -183,6 +380,55 @@ export class ProjectsComponent implements OnInit {
     return member?.name || member?.email || 'Member';
   }
 
+  getOwnerInitials(owner?: string): string {
+    if (!owner) {
+      return 'U';
+    }
+    return owner
+      .toString()
+      .split(/\s+/)
+      .map((part) => part.charAt(0).toUpperCase())
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('') || 'U';
+  }
+
+  formatDueDate(date?: string | null): string {
+    if (!date) {
+      return 'No due date';
+    }
+    try {
+      const formatter = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      return formatter.format(new Date(date));
+    } catch {
+      return date;
+    }
+  }
+
+  getPriorityPillClass(priority?: string): string {
+    const value = (priority ?? 'low').toLowerCase();
+    return `priority-pill priority-pill--${value}`;
+  }
+
+  get taskModalAvatars(): string[] {
+    if (this.selectedTask?.avatars?.length) {
+      return this.selectedTask.avatars.slice(0, 4);
+    }
+    return ['AB'];
+  }
+
+  getAttachmentExt(name?: string): string {
+    if (!name) {
+      return 'FILE';
+    }
+    const trimmed = name.toString().trim();
+    const parts = trimmed.split('.');
+    if (parts.length > 1) {
+      return (parts.pop() || '').toUpperCase();
+    }
+    return 'FILE';
+  }
+
   getStatusClass(project: any): string {
     const status = (project?.status || '').toString().toLowerCase().replace(/\s+/g, '-');
     return status ? `status-${status}` : 'status-default';
@@ -277,5 +523,183 @@ export class ProjectsComponent implements OnInit {
         this.studentsError = err?.error ?? 'Failed to load students';
       },
     });
+  }
+
+  private buildTaskForm(): void {
+    this.taskForm = this.fb.group({
+      title: ['', Validators.required],
+      label: [''],
+      description: [''],
+      duration: [''],
+      priority: ['Medium'],
+      owner: [''],
+      dueDate: [''],
+    });
+  }
+
+  openWorkspace(project?: any): void {
+    this.workspaceProject = project ?? null;
+    this.activeWorkspaceColumns = this.workspaceColumnsTemplate.map((column) => ({
+      ...column,
+      tasks: column.tasks.map((task) => ({
+        ...task,
+        stats: { ...task.stats },
+        avatars: [...task.avatars],
+        attachments: task.attachments ? task.attachments.map((attachment) => ({ ...attachment })) : [],
+      })),
+    }));
+    this.dragContext = null;
+    this.dragHoverColumnId = null;
+    this.isWorkspaceOpen = true;
+    this.closeTaskModal();
+  }
+
+  closeWorkspace(): void {
+    this.isWorkspaceOpen = false;
+    this.workspaceProject = null;
+    this.activeWorkspaceColumns = [];
+    this.dragContext = null;
+    this.dragHoverColumnId = null;
+    this.closeTaskModal();
+  }
+
+  openTaskModal(columnId: string, task?: WorkspaceTask): void {
+    this.selectedTaskColumnId = columnId;
+    this.selectedTask = task ?? null;
+    this.isCreatingTask = !task;
+    this.isTaskModalOpen = true;
+    this.taskForm?.reset({
+      title: task?.title ?? '',
+      label: task?.label ?? '',
+      description: task?.description ?? '',
+      duration: task?.duration ?? '',
+      priority: task?.priority ?? 'Medium',
+      owner: task?.owner ?? '',
+      dueDate: task?.dueDate ?? '',
+    });
+  }
+
+  closeTaskModal(): void {
+    this.isTaskModalOpen = false;
+    this.isCreatingTask = false;
+    this.selectedTask = null;
+    this.selectedTaskColumnId = null;
+    this.taskForm?.reset();
+  }
+
+  submitTaskForm(): void {
+    if (!this.taskForm || this.taskForm.invalid || !this.selectedTaskColumnId) {
+      this.taskForm?.markAllAsTouched();
+      return;
+    }
+    const formValue = this.taskForm.value;
+    const updatedTask: WorkspaceTask = {
+      id: this.selectedTask?.id ?? this.generateTaskId(),
+      title: formValue.title,
+      label: formValue.label,
+      description: formValue.description ?? '',
+      duration: formValue.duration ?? '',
+      priority: formValue.priority ?? 'Medium',
+      owner: formValue.owner ?? '',
+      dueDate: formValue.dueDate ?? '',
+      stats: this.selectedTask?.stats
+        ? { ...this.selectedTask.stats }
+        : {
+            comments: 0,
+            files: 0,
+          },
+      avatars: this.selectedTask?.avatars?.length ? [...this.selectedTask.avatars] : ['AB'],
+      statusLabel: this.selectedTask?.statusLabel,
+      attachments: this.selectedTask?.attachments?.length
+        ? this.selectedTask.attachments.map((attachment) => ({ ...attachment }))
+        : [],
+    };
+
+    this.activeWorkspaceColumns = this.activeWorkspaceColumns.map((column) => {
+      if (column.id !== this.selectedTaskColumnId) {
+        return column;
+      }
+      const tasks = [...column.tasks];
+      if (this.selectedTask) {
+        const index = tasks.findIndex((task) => task.id === this.selectedTask?.id);
+        if (index !== -1) {
+          tasks[index] = { ...tasks[index], ...updatedTask };
+        }
+      } else {
+        tasks.unshift(updatedTask);
+      }
+      return { ...column, tasks };
+    });
+
+    this.closeTaskModal();
+  }
+
+  onTaskDragStart(event: DragEvent, columnId: string, task: WorkspaceTask): void {
+    this.dragContext = { columnId, task };
+    if (event?.dataTransfer) {
+      event.dataTransfer.setData('text/plain', task.title);
+      event.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  onTaskDragEnd(): void {
+    this.dragContext = null;
+    this.dragHoverColumnId = null;
+  }
+
+  allowTaskDrop(event: DragEvent): void {
+    event?.preventDefault();
+  }
+
+  onColumnDragEnter(columnId: string, event: DragEvent): void {
+    if (!this.dragContext) {
+      return;
+    }
+    event?.preventDefault();
+    this.dragHoverColumnId = columnId;
+  }
+
+  onColumnDragLeave(columnId: string, event: DragEvent): void {
+    if (!this.dragContext) {
+      return;
+    }
+    const related = event?.relatedTarget as HTMLElement | null;
+    if (event.currentTarget instanceof HTMLElement && related && event.currentTarget.contains(related)) {
+      return;
+    }
+    if (this.dragHoverColumnId === columnId) {
+      this.dragHoverColumnId = null;
+    }
+  }
+
+  onTaskDrop(columnId: string, event: DragEvent): void {
+    if (!this.dragContext) {
+      return;
+    }
+    event?.preventDefault();
+    const { columnId: sourceId, task } = this.dragContext;
+    if (sourceId === columnId) {
+      this.onTaskDragEnd();
+      return;
+    }
+    this.activeWorkspaceColumns = this.activeWorkspaceColumns.map((column) => {
+      if (column.id === sourceId) {
+        return { ...column, tasks: column.tasks.filter((item) => item !== task) };
+      }
+      if (column.id === columnId) {
+        return { ...column, tasks: [...column.tasks, task] };
+      }
+      return column;
+    });
+    this.onTaskDragEnd();
+  }
+
+  private generateTaskId(): string {
+    return `task-${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  get selectedTaskColumnTitle(): string {
+    const column = this.activeWorkspaceColumns.find((item) => item.id === this.selectedTaskColumnId);
+    return column?.title ?? '';
   }
 }
